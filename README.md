@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Arch](https://img.shields.io/badge/arch-aarch64-orange)](#requirements)
 
+![Opencode for Termux Android](img/opencode-termux.avif)
+
 [OpenCode](https://github.com/anomalyco/opencode) is an AI coding agent that ships as a glibc-linked binary, which is a problem on Android since Termux runs on Bionic, not glibc. This project installs OpenCode on Termux the native way: it pulls in glibc through `pkg`, downloads the official OpenCode release, and compiles a small C bootstrapper that bridges the two libc's at runtime. No proot, no chroot, no Docker, no performance penalty. Just OpenCode running directly on your phone or tablet.
 
 If you've been searching for **how to install OpenCode on Termux**, **run an AI coding agent on Android**, or **get a glibc binary working on Termux**, this is built for exactly that.
