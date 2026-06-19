@@ -1,0 +1,8 @@
+*.o
+*.out
+.cache/
+.Trash-*
+.DS_Store
+*.swp
+*.swo
+*~
