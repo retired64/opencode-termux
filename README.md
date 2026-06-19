@@ -1,12 +1,14 @@
 # opencode-termux
 
-**OpenCode installer for Termux (native glibc + C bootstrapper)**
+**Run OpenCode natively on Termux (Android) — no proot, no containers, no emulation.**
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)](VERSION)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Arch](https://img.shields.io/badge/arch-aarch64-orange)](#requirements)
 
-Instala [OpenCode](https://github.com/anomalyco/opencode) de forma nativa en Termux (Android) usando glibc y un bootstrapper C compilado con Clang. Sin contenedores, sin proot, sin overhead.
+[OpenCode](https://github.com/anomalyco/opencode) is an AI coding agent that ships as a glibc-linked binary — which is a problem on Android, since Termux runs on Bionic, not glibc. This project installs OpenCode on Termux the native way: it pulls in glibc through `pkg`, downloads the official OpenCode release, and compiles a small C bootstrapper that bridges the two libc's at runtime. No proot, no chroot, no Docker, no performance penalty — just OpenCode running directly on your phone or tablet.
+
+If you've been searching for **how to install OpenCode on Termux**, **run an AI coding agent on Android**, or **get a glibc binary working on Termux**, this is built for exactly that.
 
 ---
 
@@ -16,7 +18,7 @@ Instala [OpenCode](https://github.com/anomalyco/opencode) de forma nativa en Ter
 curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/install.sh | bash
 ```
 
-O si prefieres revisar el script antes de ejecutarlo:
+Prefer to read the script before running it? Totally fair:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/install.sh -o install.sh
@@ -28,31 +30,31 @@ bash install.sh
 
 ## Requirements
 
-- **Termux** instalado desde [F-Droid](https://f-droid.org/) (NO Google Play)
-- Arquitectura **aarch64** (ARM64)
-- Conexión a internet
+- **Termux** installed from [F-Droid](https://f-droid.org/) — not the Play Store build, which is outdated and unmaintained
+- **aarch64 (ARM64)** device — this is the only architecture OpenCode ships for on Android
+- An internet connection for the initial setup
 
-Todo lo demás (glibc, clang, git, ripgrep, python, nodejs, etc.) se instala automáticamente.
+Everything else — glibc, clang, git, ripgrep, python, Node.js, etc. — gets installed automatically.
 
 ---
 
 ## How it works
 
-OpenCode se distribuye como un binario enlazado contra **glibc**, pero Termux usa **Bionic** (la libc de Android). Para ejecutar OpenCode necesitamos un puente:
+OpenCode is distributed as a binary linked against **glibc**, but Termux runs on **Bionic**, the libc Android ships with. To bridge that gap, the installer compiles a small C bootstrapper that gets placed in your `$PATH` as `opencode`:
 
 ```
-$PREFIX/bin/opencode               ← Bootstrapper C (compilado nativo, Bionic)
+$PREFIX/bin/opencode                       ← C bootstrapper (native Bionic binary)
     │
     │  execv()
     ▼
-$PREFIX/glibc/lib/ld-linux-aarch64.so.1  ← Dynamic linker glibc
+$PREFIX/glibc/lib/ld-linux-aarch64.so.1    ← glibc dynamic linker
     │
     │  --library-path $PREFIX/glibc/lib
     ▼
-~/.local/share/opencode-termux/bin/opencode  ← Binario real OpenCode (glibc)
+~/.local/share/opencode-termux/bin/opencode ← Real OpenCode binary (glibc)
 ```
 
-El bootstrapper C (`src/opencode_helper.c`, 52 líneas) se compila con Clang en el momento de la instalación. Es un binario nativo de Android (Bionic) que limpia variables de entorno conflictivas y carga el binario real de OpenCode a través del dynamic linker de glibc.
+The bootstrapper (`src/opencode_helper.c`, ~50 lines) is compiled with Clang at install time. It's a native Bionic binary that strips out conflicting environment variables (`LD_PRELOAD`, `LD_LIBRARY_PATH`) and hands off execution to the real OpenCode binary through the glibc dynamic linker. The result: typing `opencode` in any Termux session just works, like it would on a regular Linux box.
 
 ---
 
@@ -61,10 +63,10 @@ El bootstrapper C (`src/opencode_helper.c`, 52 líneas) se compila con Clang en 
 ### Install
 
 ```bash
-# Método 1: curl pipe (recomendado)
+# Method 1: curl pipe (fastest)
 curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/install.sh | bash
 
-# Método 2: clonar y ejecutar
+# Method 2: clone and run
 git clone https://github.com/retired64/opencode-termux.git
 cd opencode-termux
 bash install.sh
@@ -80,11 +82,11 @@ bash update.sh
 ### Uninstall
 
 ```bash
-# Si clonaste el repo
+# If you cloned the repo
 cd opencode-termux
 bash uninstall.sh
 
-# O directamente desde GitHub
+# Or directly from GitHub
 curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/uninstall.sh | bash
 ```
 
@@ -96,20 +98,20 @@ curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/unin
 opencode-termux/
 ├── .github/workflows/ci.yml   # CI: ShellCheck + syntax check
 ├── src/
-│   └── opencode_helper.c      # Bootstrapper C nativo
+│   └── opencode_helper.c      # Native C bootstrapper
 ├── lib/
-│   ├── env.sh                 # Constantes y rutas (namespace OT_*)
-│   ├── colors.sh              # Definiciones de colores ANSI
-│   ├── logging.sh             # Funciones de logging + banner
-│   ├── deps.sh                # Instalación de dependencias
-│   ├── download.sh            # Descarga de OpenCode desde GitHub Releases
-│   └── compile.sh             # Compilación del bootstrapper
-├── install.sh                 # Instalador principal
-├── uninstall.sh               # Desinstalador
-├── update.sh                  # Actualizador
-├── VERSION                    # Versión del instalador
-├── LICENSE                    # MIT
-└── README.md                  # Este archivo
+│   ├── env.sh                 # Constants and paths (OT_* namespace)
+│   ├── colors.sh               # ANSI color definitions
+│   ├── logging.sh              # Logging helpers + banner
+│   ├── deps.sh                 # Dependency installation
+│   ├── download.sh             # Downloads OpenCode from GitHub Releases
+│   └── compile.sh              # Compiles the bootstrapper
+├── install.sh                  # Main installer
+├── uninstall.sh                # Uninstaller
+├── update.sh                   # Updater
+├── VERSION                     # Installer version
+├── LICENSE                     # MIT
+└── README.md                   # This file
 ```
 
 ---
@@ -131,7 +133,7 @@ opencode-termux/
 
 ### `opencode: command not found`
 
-El bootstrapper no está en el PATH. Reinstala:
+The bootstrapper isn't in your `$PATH`. Reinstall:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/install.sh | bash
@@ -139,7 +141,7 @@ curl -fsSL https://raw.githubusercontent.com/retired64/opencode-termux/main/inst
 
 ### `execv: No such file or directory`
 
-Falta glibc o el binario de OpenCode:
+Either glibc or the OpenCode binary is missing:
 
 ```bash
 pkg install glibc-repo -y && pkg install glibc -y
@@ -166,7 +168,7 @@ echo "nameserver 8.8.4.4" >> $PREFIX/etc/resolv.conf
 
 | Package | Binary | Purpose |
 |---------|--------|---------|
-| glibc-repo | (repo) | Adds glibc package repository |
+| glibc-repo | (repo) | Adds the glibc package repository |
 | glibc | ld-linux-aarch64.so.1 | Dynamic linker + glibc libraries |
 | clang | clang | Compiles the C bootstrapper |
 | git | git | Required by OpenCode |
@@ -179,9 +181,25 @@ echo "nameserver 8.8.4.4" >> $PREFIX/etc/resolv.conf
 
 ---
 
+## FAQ
+
+**Does this work on Termux from the Play Store?**
+No. Use the [F-Droid build](https://f-droid.org/) — the Play Store version is deprecated and missing packages this installer relies on.
+
+**Does this work on x86_64 or 32-bit ARM?**
+Not yet. OpenCode only publishes `aarch64` (ARM64) releases, so that's the only architecture supported here.
+
+**Is this a fork or wrapper of OpenCode itself?**
+No. This repo doesn't modify OpenCode at all — it just handles the glibc/Bionic bridging so the official binary runs unmodified on Android.
+
+**Will this slow down OpenCode compared to a regular Linux machine?**
+No meaningful overhead. There's no proot, no containerization layer, no translation step at runtime — the bootstrapper just hands off execution once via `execv()`.
+
+---
+
 ## License
 
 MIT © 2026 [retired64](https://github.com/retired64)
 
 OpenCode is developed by [anomalyco](https://github.com/anomalyco/opencode) and distributed under its own license.
-# opencode-termux
+
