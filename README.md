@@ -1,12 +1,12 @@
 # opencode-termux
 
-**Run OpenCode natively on Termux (Android) — no proot, no containers, no emulation.**
+**Run OpenCode natively on Termux (Android). No proot, no containers, no emulation.**
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)](VERSION)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Arch](https://img.shields.io/badge/arch-aarch64-orange)](#requirements)
 
-[OpenCode](https://github.com/anomalyco/opencode) is an AI coding agent that ships as a glibc-linked binary — which is a problem on Android, since Termux runs on Bionic, not glibc. This project installs OpenCode on Termux the native way: it pulls in glibc through `pkg`, downloads the official OpenCode release, and compiles a small C bootstrapper that bridges the two libc's at runtime. No proot, no chroot, no Docker, no performance penalty — just OpenCode running directly on your phone or tablet.
+[OpenCode](https://github.com/anomalyco/opencode) is an AI coding agent that ships as a glibc-linked binary, which is a problem on Android since Termux runs on Bionic, not glibc. This project installs OpenCode on Termux the native way: it pulls in glibc through `pkg`, downloads the official OpenCode release, and compiles a small C bootstrapper that bridges the two libc's at runtime. No proot, no chroot, no Docker, no performance penalty. Just OpenCode running directly on your phone or tablet.
 
 If you've been searching for **how to install OpenCode on Termux**, **run an AI coding agent on Android**, or **get a glibc binary working on Termux**, this is built for exactly that.
 
@@ -30,11 +30,11 @@ bash install.sh
 
 ## Requirements
 
-- **Termux** installed from [F-Droid](https://f-droid.org/) — not the Play Store build, which is outdated and unmaintained
-- **aarch64 (ARM64)** device — this is the only architecture OpenCode ships for on Android
+- **Termux** installed from [F-Droid](https://f-droid.org/), not the Play Store build (it's outdated and unmaintained)
+- **aarch64 (ARM64)** device, the only architecture OpenCode ships for on Android
 - An internet connection for the initial setup
 
-Everything else — glibc, clang, git, ripgrep, python, Node.js, etc. — gets installed automatically.
+Everything else (glibc, clang, git, ripgrep, python, Node.js, etc.) gets installed automatically.
 
 ---
 
@@ -184,16 +184,16 @@ echo "nameserver 8.8.4.4" >> $PREFIX/etc/resolv.conf
 ## FAQ
 
 **Does this work on Termux from the Play Store?**
-No. Use the [F-Droid build](https://f-droid.org/) — the Play Store version is deprecated and missing packages this installer relies on.
+No. Use the [F-Droid build](https://f-droid.org/) instead. The Play Store version is deprecated and missing packages this installer relies on.
 
 **Does this work on x86_64 or 32-bit ARM?**
 Not yet. OpenCode only publishes `aarch64` (ARM64) releases, so that's the only architecture supported here.
 
 **Is this a fork or wrapper of OpenCode itself?**
-No. This repo doesn't modify OpenCode at all — it just handles the glibc/Bionic bridging so the official binary runs unmodified on Android.
+No. This repo doesn't modify OpenCode at all. It just handles the glibc/Bionic bridging so the official binary runs unmodified on Android.
 
 **Will this slow down OpenCode compared to a regular Linux machine?**
-No meaningful overhead. There's no proot, no containerization layer, no translation step at runtime — the bootstrapper just hands off execution once via `execv()`.
+No meaningful overhead. There's no proot, no containerization layer, and no translation step at runtime. The bootstrapper just hands off execution once via `execv()`.
 
 ---
 
